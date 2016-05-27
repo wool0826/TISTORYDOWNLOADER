@@ -101,7 +101,7 @@ public class Downloader {
 				golink.setEnabled(true);
 			}
 		});
-		GhostText gt = new GhostText(this.link, "이곳에 링크를 입력해주세요.");
+		GhostText hint = new GhostText(this.link, "이곳에 링크를 입력해주세요.");
 
 		JScrollPane scrollPane = new JScrollPane(details);
 		scrollPane.setBounds(10, 60, 780, 500);
