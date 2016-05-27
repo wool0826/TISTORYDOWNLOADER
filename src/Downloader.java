@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.text.DefaultCaret;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -54,11 +53,17 @@ public class Downloader {
 				
 				try {
 					Document document = con.get();
+					
 					Element content = document.getElementById("content");
+					
+					if(content == null) content = document.getElementById("contents");
+					if(content == null) content = con.get();
+										
 					Elements elements = content.getElementsByTag("img");
 					
 					String title = document.title().toString();
-					title = title.replaceAll("[\\/:*<>|?\"]", " ");
+					title = title.replaceAll("[\\/:*<>|?\"]", "");
+					title = title.trim();
 					
 					String dest = HomeDir + title + "\\";
 					
