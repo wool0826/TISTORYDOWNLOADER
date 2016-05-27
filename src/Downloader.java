@@ -53,7 +53,8 @@ public class Downloader {
 				
 				try {
 					Document document = con.get();
-					Elements elements = document.getElementsByTag("img");
+					Element content = document.getElementById("content");
+					Elements elements = content.getElementsByTag("img");
 					
 					String title = document.title().toString();
 					title = title.replaceAll("[\\/:*<>|?\"]", " ");
