@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.DefaultCaret;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -98,7 +99,7 @@ public class Downloader {
 					err.printStackTrace();
 				}
 
-				details.append("다운로드 됨: " + down + " 오류 발생: " + error + " 존재했던 파일: " + pass + " 처리됨: " + (down + error + pass) + "\n");
+				details.append("다운로드 됨: " + down + " 오류 발생: " + error + " 존재하는 파일: " + pass + " 처리됨: " + (down + error + pass) + "\n\n");
 				golink.setEnabled(true);
 			}
 		});
@@ -106,8 +107,9 @@ public class Downloader {
 
 		JScrollPane scrollPane = new JScrollPane(details);
 		scrollPane.setBounds(10, 60, 780, 500);
-		scrollPane.setVerticalScrollBarPolicy(22);
-
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		
 		details.setEditable(false);
 		details.setText("사진이 저장될 경로: " + HomeDir + "\n\n");
 
