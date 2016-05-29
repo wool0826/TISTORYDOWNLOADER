@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -217,12 +219,20 @@ public class Downloader {
 		details.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		details.setEditable(false);
 		details.setFont(new Font("Dialog", Font.PLAIN, 12));
-		details.setText("사진이 저장될 경로: C:\\WINDOWS\\system32\\MyPictures\\\r\n\r\n");
+		details.setText("사진이 저장될 경로: " + HomeDir);
 				
 		JScrollPane scrollPane = new JScrollPane(details);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.setBorder(null);
 		scrollPane.setRowHeaderView(horizontalStrut);
+		scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
+
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				// TODO Auto-generated method stub
+				e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+			}			
+		});
 		
 		JPanel panel = new JPanel();
 		panel.setPreferredSize(new Dimension(10, 15));
