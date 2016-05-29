@@ -1,4 +1,5 @@
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
@@ -7,12 +8,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -29,46 +34,60 @@ public class Downloader {
 	JScrollPane scr = new JScrollPane();
 
 	public void createFrame() {
-		frame.setLayout(new FlowLayout());
+		frame.getContentPane().setLayout(new FlowLayout());
 		frame.setSize(880, 500);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		golink.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+
 				File f = new File(HomeDir);
-				if (!f.exists()) f.mkdirs();
-				
+				if (!f.exists())
+					f.mkdirs();
+
 				golink.setEnabled(false);
-				
+
 				int down = 0;
 				int pass = 0;
 				int error = 0;
-				
-				String getLink = link.getText();
 
+				String getLink = link.getText();
+				
+				Pattern p = Pattern.compile("^(https?):\\/\\/([^:\\/\\s]+)(:([^\\/]*))?((\\/[^\\s/\\/]+)*)?\\/([^#\\s\\?]*)(\\?([^#\\s]*))?(#(\\w*))?$");
+				Matcher m = p.matcher(getLink);
+				
+				if(!m.matches()) getLink = "";
+
+				if(getLink.equals("")){
+					golink.setEnabled(true);
+					return;
+				}
+				
 				Connection con = Jsoup.connect(getLink);
 				con.timeout(15 * 1000);
-				
+
 				try {
 					Document document = con.get();
-					
+
 					Element content = document.getElementById("content");
-					
-					if(content == null) content = document.getElementById("contents");
-					if(content == null) content = con.get();
-										
+
+					if (content == null)
+						content = document.getElementById("contents");
+					if (content == null)
+						content = con.get();
+
 					Elements elements = content.getElementsByTag("img");
-					
+
 					String title = document.title().toString();
 					title = title.replaceAll("[\\/:*<>|?\"]", "");
 					title = title.trim();
-					
+
 					String dest = HomeDir + title + "\\";
-					
+
 					f = new File(dest);
-					if(!f.exists()) f.mkdirs();				
+					if (!f.exists())
+						f.mkdirs();
 
 					for (Element el : elements) {
 						String[] arr = el.attr("src").toString().split("/");
@@ -79,18 +98,18 @@ public class Downloader {
 							if (!f.exists()) {
 								details.append("LINK: " + arr[0] + "//" + arr[2] + "/original/" + arr[4] + "\n");
 								details.append("FILE_NAME: " + el.attr("filename").toString() + " \n");
-								
 
-								int status = saveImage(dest + el.attr("filename").toString(),arr[0] + "//" + arr[2] + "/original/" + arr[4]);
-								
-								if(status == 0){
+								int status = saveImage(dest + el.attr("filename").toString(),
+										arr[0] + "//" + arr[2] + "/original/" + arr[4]);
+
+								if (status == 0) {
 									down++;
 									details.append("STATUS: 다운로드됨\n\n");
 								} else {
 									error++;
 									details.append("STATUS: 다운로드 오류\n\n");
 								}
-								
+
 							} else {
 								details.append("LINK: " + arr[0] + "//" + arr[2] + "/original/" + arr[4] + "\n");
 								details.append("FILE_NAME: " + el.attr("filename").toString() + " \n");
@@ -104,23 +123,24 @@ public class Downloader {
 					err.printStackTrace();
 				}
 
-				details.append("다운로드 됨: " + down + " 오류 발생: " + error + " 존재하는 파일: " + pass + " 처리됨: " + (down + error + pass) + "\n\n");
+				details.append("다운로드 됨: " + down + " 오류 발생: " + error + " 존재하는 파일: " + pass + " 처리됨: "
+						+ (down + error + pass) + "\n\n");
 				golink.setEnabled(true);
 			}
 		});
 		GhostText hint = new GhostText(this.link, "이곳에 링크를 입력해주세요.");
+		details.setFont(new Font("Dialog", Font.PLAIN, 12));
 
 		JScrollPane scrollPane = new JScrollPane(details);
 		scrollPane.setBounds(10, 60, 780, 500);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		
-		
+
 		details.setEditable(false);
 		details.setText("사진이 저장될 경로: " + HomeDir + "\n\n");
 
-		frame.add(link);
-		frame.add(golink);
-		frame.add(scrollPane);
+		frame.getContentPane().add(link);
+		frame.getContentPane().add(golink);
+		frame.getContentPane().add(scrollPane);
 
 		frame.setVisible(true);
 
@@ -129,6 +149,19 @@ public class Downloader {
 
 	public static void main(String[] args) {
 		Downloader down = new Downloader();
+
+		try {
+			// Set cross-platform Java L&F (also called "Metal")
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (UnsupportedLookAndFeelException e) {
+			// handle exception
+		} catch (ClassNotFoundException e) {
+			// handle exception
+		} catch (InstantiationException e) {
+			// handle exception
+		} catch (IllegalAccessException e) {
+			// handle exception
+		}
 
 		down.createFrame();
 	}
@@ -139,7 +172,6 @@ public class Downloader {
 
 			InputStream is = url.openStream();
 			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest));
-			
 
 			byte[] b = new byte[2048];
 			int length;
@@ -149,11 +181,11 @@ public class Downloader {
 
 			is.close();
 			bos.close();
-			
+
 			return 0;
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+
 			return -1;
 		}
 	}
