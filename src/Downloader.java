@@ -217,7 +217,7 @@ public class Downloader {
 		details.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		details.setEditable(false);
 		details.setFont(new Font("Dialog", Font.PLAIN, 12));
-		details.setText("사진이 저장될 경로: C:\\WINDOWS\\system32\\MyPictures\\\r\n\r\n");
+		details.setText("사진이 저장될 경로: " + HomeDir + "\n\n");
 				
 		JScrollPane scrollPane = new JScrollPane(details);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
