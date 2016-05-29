@@ -1,11 +1,11 @@
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 
 import javax.swing.JButton;
@@ -138,16 +138,17 @@ public class Downloader {
 			URL url = new URL(link);
 
 			InputStream is = url.openStream();
-			OutputStream os = new FileOutputStream(dest);
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest));
+			
 
 			byte[] b = new byte[2048];
 			int length;
 			while ((length = is.read(b)) != -1) {
-				os.write(b, 0, length);
+				bos.write(b, 0, length);
 			}
 
 			is.close();
-			os.close();
+			bos.close();
 			
 			return 0;
 		} catch (Exception e) {
