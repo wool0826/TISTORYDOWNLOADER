@@ -33,7 +33,7 @@ import org.jsoup.select.Elements;
 
 public class Downloader {
 	String HomeDirectory = System.getProperty("user.dir").toString() + "\\MyPictures\\";
-	JFrame frame = new JFrame("Tistory Downloader [ver 1.2]");
+	JFrame frame = new JFrame("Tistory Original Image Downloader ver 1.1");
 
 	JTextPane details = new JTextPane();
 
