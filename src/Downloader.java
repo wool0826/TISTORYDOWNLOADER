@@ -36,11 +36,11 @@ public class Downloader {
 	JFrame frame = new JFrame("Tistory Original Image Downloader ver 1.1");
 
 	JTextPane details = new JTextPane();
-
+	JScrollPane scrollPane;
 	// Pane에 goLink와 link를 묶어서 하나의 컴포넌트로 취급
 	JPanel pane = new JPanel();
 	JButton golink = new JButton("GO");
-	JTextField linkField = new JTextField(71);
+	JTextField linkField = new JTextField();
 
 	// JTextPane에서 Style을 설정해 주기 위한 컴포넌트
 	StyledDocument doc = details.getStyledDocument();
@@ -59,8 +59,8 @@ public class Downloader {
 
 		// 프레임 설정
 		frame.getContentPane().setLayout(new BorderLayout());
-		frame.setSize(880, 500);
-		frame.setResizable(false);
+		frame.setSize(640, 480);
+		frame.setMinimumSize(new Dimension(350, 300));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// JTextPane 스타일 설정
@@ -79,14 +79,14 @@ public class Downloader {
 		GhostText hint = new GhostText(this.linkField, "이곳에 링크를 입력해주세요.");
 
 		// JTextPane 설정
-		details.setBorder(new LineBorder(Color.LIGHT_GRAY));
+		// details.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		details.setEditable(false);
 		details.setFont(new Font("Dialog", Font.PLAIN, 12));
 		details.setText("사진이 저장될 경로: " + HomeDirectory + "\n\n");
 
-		JScrollPane scrollPane = new JScrollPane(details);
+		scrollPane = new JScrollPane(details);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.setBorder(null);
+		scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		scrollPane.setRowHeaderView(horizontalStrut);
 
 		JPanel panel = new JPanel();
@@ -98,6 +98,7 @@ public class Downloader {
 		panel.add(verticalStrut);
 		frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
+		linkField.setPreferredSize(new Dimension(250, 29));
 		pane.add(linkField);
 		pane.add(golink);
 		frame.getContentPane().add(pane, BorderLayout.NORTH);
@@ -142,10 +143,13 @@ public class Downloader {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
+			destList.clear();
+			linkList.clear();
+
 			// MyPictures 폴더가 있는 지 없는 지 버튼을 누를 때 마다 검사함.
 			// 존재하지 않을 경우 폴더 생성
 			File f = new File(HomeDirectory);
-			
+
 			if (!f.exists())
 				f.mkdirs();
 
@@ -205,7 +209,7 @@ public class Downloader {
 
 				// 위에서 만들어 낸 폴더 명인 폴더가 있는 지 확인 후 없으면 생성.
 				f = new File(dest);
-				
+
 				if (!f.exists())
 					f.mkdirs();
 
@@ -268,6 +272,8 @@ public class Downloader {
 			} catch (Exception ex) {
 			}
 
+			details.setCaretPosition(details.getDocument().getLength());
+			
 			golink.setEnabled(true);
 		}
 
