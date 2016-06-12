@@ -5,12 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +21,6 @@ import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -37,22 +32,20 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Downloader {
-	String HomeDir = System.getProperty("user.dir").toString() + "\\MyPictures\\";
+	String HomeDirectory = System.getProperty("user.dir").toString() + "\\MyPictures\\";
 	JFrame frame = new JFrame("Tistory Original Image Downloader ver 1.1");
 
-	// ScrollPane에 JTextPane을 넣어서 하나의 컴포넌트처럼 취급.
 	JTextPane details = new JTextPane();
-	JScrollPane scr = new JScrollPane();
 
 	// Pane에 goLink와 link를 묶어서 하나의 컴포넌트로 취급
 	JPanel pane = new JPanel();
 	JButton golink = new JButton("GO");
-	JTextField link = new JTextField(71);
+	JTextField linkField = new JTextField(71);
 
 	// JTextPane에서 Style을 설정해 주기 위한 컴포넌트
 	StyledDocument doc = details.getStyledDocument();
-	SimpleAttributeSet err = new SimpleAttributeSet();
-	SimpleAttributeSet pas = new SimpleAttributeSet();
+	SimpleAttributeSet errorAttr = new SimpleAttributeSet();
+	SimpleAttributeSet passAttr = new SimpleAttributeSet();
 
 	// UI를 깔끔하게 하기 위한 컴포넌트
 	private final Component horizontalStrut = Box.createHorizontalStrut(15);
@@ -71,11 +64,11 @@ public class Downloader {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// JTextPane 스타일 설정
-		StyleConstants.setForeground(err, Color.decode("#800517"));
-		StyleConstants.setBold(err, true);
+		StyleConstants.setForeground(errorAttr, Color.decode("#800517"));
+		StyleConstants.setBold(errorAttr, true);
 
-		StyleConstants.setForeground(pas, Color.decode("#0000A0"));
-		StyleConstants.setBold(pas, true);
+		StyleConstants.setForeground(passAttr, Color.decode("#0000A0"));
+		StyleConstants.setBold(passAttr, true);
 
 		// 각 컴포넌트 설정
 
@@ -83,13 +76,13 @@ public class Downloader {
 		golink.addActionListener(new GoActionListener());
 
 		// 힌트를 위해 새로운 객체 생성
-		GhostText hint = new GhostText(this.link, "이곳에 링크를 입력해주세요.");
+		GhostText hint = new GhostText(this.linkField, "이곳에 링크를 입력해주세요.");
 
 		// JTextPane 설정
 		details.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		details.setEditable(false);
 		details.setFont(new Font("Dialog", Font.PLAIN, 12));
-		details.setText("사진이 저장될 경로: " + HomeDir + "\n\n");
+		details.setText("사진이 저장될 경로: " + HomeDirectory + "\n\n");
 
 		JScrollPane scrollPane = new JScrollPane(details);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -105,7 +98,7 @@ public class Downloader {
 		panel.add(verticalStrut);
 		frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-		pane.add(link);
+		pane.add(linkField);
 		pane.add(golink);
 		frame.getContentPane().add(pane, BorderLayout.NORTH);
 
@@ -114,23 +107,21 @@ public class Downloader {
 		// 프로그램 시작 시 힌트(GhostText)를 보여주기 위해서 JTextPane에 Focus를 줌.
 		details.requestFocus();
 	}
-	
-	public void result_print(String link, String dest, String type){
-		SimpleAttributeSet temp = null;
-		
-		switch(type){
+
+	public void result_print(String link, String dest, String type) {
+		SimpleAttributeSet attr = null;
+
+		switch (type) {
 		case "ERROR":
-			temp = err;
+			attr = errorAttr;
 		case "PASS":
-			temp = pas;
+			attr = passAttr;
 		}
-		
-		try{
-		doc.insertString(doc.getLength(),
-				"LINK: " + link + "\n", temp);
-		doc.insertString(doc.getLength(),
-				"FILE_NAME: " + dest + " \nSTATUS: "+ type +"\n\n", temp);
-		}catch(Exception e){
+
+		try {
+			doc.insertString(doc.getLength(), "LINK: " + link + "\n", attr);
+			doc.insertString(doc.getLength(), "FILE_NAME: " + dest + " \nSTATUS: " + type + "\n\n", attr);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -153,7 +144,8 @@ public class Downloader {
 
 			// MyPictures 폴더가 있는 지 없는 지 버튼을 누를 때 마다 검사함.
 			// 존재하지 않을 경우 폴더 생성
-			File f = new File(HomeDir);
+			File f = new File(HomeDirectory);
+			
 			if (!f.exists())
 				f.mkdirs();
 
@@ -164,7 +156,7 @@ public class Downloader {
 			int error = 0;
 			int pass = 0;
 
-			String getLink = link.getText();
+			String getLink = linkField.getText();
 
 			// link에 적혀있는 문자열이 http:// 로 시작되는 URL 형식인지 판단
 			// 1. 형식이 맞다면 접속
@@ -209,30 +201,32 @@ public class Downloader {
 				title = title.replaceAll("[\\/:*<>|?\"]", "");
 				title = title.trim();
 
-				String dest = HomeDir + title + "\\";
+				String dest = HomeDirectory + title + "\\";
 
 				// 위에서 만들어 낸 폴더 명인 폴더가 있는 지 확인 후 없으면 생성.
 				f = new File(dest);
+				
 				if (!f.exists())
 					f.mkdirs();
 
 				// img 태그가 붙어있는 코드들에서 src를 / 단위로 분해함.
-				for (Element el : elements) {
-					String[] arr = el.attr("src").toString().split("/");
+				for (Element element : elements) {
+					String[] arr = element.attr("src").toString().split("/");
 
 					// tistory에서 유저가 올린 파일은 cfile00.tistory.com~~~~ 와 같은 형식으로
 					// 올라가므로 cfile이 존재하는 링크인지 확인
 					if (arr[2].contains("cfile")) {
 
 						// 존재하는 파일인지 이름을 통해서 확인.
-						f = new File(dest + el.attr("filename").toString());
+						f = new File(dest + element.attr("filename").toString());
 
 						if (!f.exists()) {
 							linkList.add(arr[0] + "//" + arr[2] + "/original/" + arr[4]);
-							destList.add(dest + el.attr("filename").toString());
+							destList.add(dest + element.attr("filename").toString());
 						} else {
-							pass++;							
-							result_print(arr[0] + "//" + arr[2] + "/original/" + arr[4], dest + el.attr("filename").toString(), "PASS");
+							pass++;
+							result_print(arr[0] + "//" + arr[2] + "/original/" + arr[4],
+									dest + element.attr("filename").toString(), "PASS");
 						}
 					}
 				}
